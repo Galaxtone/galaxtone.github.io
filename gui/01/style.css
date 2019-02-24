@@ -47,15 +47,12 @@ textarea {
 	right: 6px;
 }
 
-::-webkit-scrollbar, ::-webkit-scrollbar-thumb {
+::-webkit-scrollbar, ::-webkit-scrollbar-thumb, ::-webkit-scrollbar-corner {
   width: 16px;
   height: 16px;
 
+  color: #0000;
   border-radius: 16px;
-}
-
-::-webkit-scrollbar-corner {
-	color: #0000;
 }
 
 .light_theme {
@@ -68,12 +65,8 @@ textarea {
 	color: #222;
 }
 
-.light_theme ::-webkit-scrollbar {
-  background-color: #ddd;
-}
-
 .light_theme ::-webkit-scrollbar-thumb  {
-	background-color: #ccc;
+	background-color: #ddd;
 }
 
 .dark_theme {
@@ -86,10 +79,6 @@ textarea {
 	color: #ddd;
 }
 
-.dark_theme ::-webkit-scrollbar {
-  background-color: #444;
-}
-
 .dark_theme ::-webkit-scrollbar-thumb  {
-	background-color: #555;
+	background-color: #444;
 }
