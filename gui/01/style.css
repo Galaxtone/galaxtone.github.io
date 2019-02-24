@@ -1,0 +1,99 @@
+body {
+	font-family: monospace;
+	font-size: 16px;
+}
+
+:focus {
+	outline: none;
+}
+
+textarea {
+	display: block;
+	margin: 0 auto 0 auto;
+
+	white-space: nowrap;
+	overflow: scroll;
+	resize: none;
+
+	padding: 4px;
+	border: 0px;
+
+	border-radius: 16px;
+	border-top-left-radius: 8px;
+}
+
+::-webkit-scrollbar, ::-webkit-scrollbar-thumb,  ::-webkit-scrollbar-corner {
+  width: 16px;
+  height: 16px;
+
+  border-radius: 16px;
+}
+
+.light_theme {
+	background-color: #fff;
+	color: #000;
+}
+
+.light_theme textarea {
+	background-color: #eee;
+	color: #222;
+}
+
+.light_theme ::-webkit-scrollbar {
+  background-color: #ddd;
+}
+
+.light_theme ::-webkit-scrollbar-corner {
+	background-color: #eee;
+}
+
+.light_theme ::-webkit-scrollbar-thumb  {
+	background-color: #ccc;
+}
+
+.dark_theme {
+	background-color: #333;
+	color: #fff;
+}
+
+.dark_theme textarea {
+	background-color: #222;
+	color: #ddd;
+}
+
+.dark_theme ::-webkit-scrollbar {
+  background-color: #444;
+}
+
+.dark_theme ::-webkit-scrollbar-thumb  {
+	background-color: #555;
+}
+
+.dark_theme ::-webkit-scrollbar-corner {
+	background-color: #222;
+}
+
+#code {
+	margin-top: 30px;
+	margin-bottom: 15px;
+
+	width: 792px;
+	height: 297px;
+}
+
+#console {
+	width: 693px;
+	height: 198px;
+}
+
+.dark_checkbox {
+	position: absolute;
+	bottom: 0px;
+	left: 0px;
+}
+
+.dark_checkbox label {
+	position: relative;
+	bottom: 2px;
+	left: 2px;
+}
