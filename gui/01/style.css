@@ -11,7 +11,7 @@ textarea {
 	display: block;
 	margin: 0 auto 0 auto;
 
-	white-space: nowrap;
+	white-space: pre;
 	overflow: scroll;
 	resize: none;
 
@@ -19,7 +19,32 @@ textarea {
 	border: 0px;
 
 	border-radius: 16px;
-	border-top-left-radius: 8px;
+	border-top-left-radius: 6px;
+}
+
+#code {
+	margin-top: 30px;
+	margin-bottom: 15px;
+
+	width: 750px;
+	height: 250px;
+}
+
+#console {
+	width: 600px;
+	height: 150px;
+}
+
+.dark_checkbox {
+	position: fixed;
+	top: 2px;
+	left: 2px;
+}
+
+.dark_checkbox label {
+	position: relative;
+	bottom: 2px;
+	right: 6px;
 }
 
 ::-webkit-scrollbar, ::-webkit-scrollbar-thumb,  ::-webkit-scrollbar-corner {
@@ -71,29 +96,4 @@ textarea {
 
 .dark_theme ::-webkit-scrollbar-corner {
 	background-color: #222;
-}
-
-#code {
-	margin-top: 30px;
-	margin-bottom: 15px;
-
-	width: 792px;
-	height: 297px;
-}
-
-#console {
-	width: 693px;
-	height: 198px;
-}
-
-.dark_checkbox {
-	position: absolute;
-	bottom: 0px;
-	left: 0px;
-}
-
-.dark_checkbox label {
-	position: relative;
-	bottom: 2px;
-	left: 2px;
 }
