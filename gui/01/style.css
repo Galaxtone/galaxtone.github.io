@@ -56,12 +56,12 @@ textarea {
 }
 
 .light_theme {
-	background-color: #fff;
+	background-color: #eee;
 	color: #000;
 }
 
 .light_theme textarea {
-	background-color: #eee;
+	background-color: #fff;
 	color: #222;
 }
 
