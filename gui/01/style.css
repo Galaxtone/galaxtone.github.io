@@ -47,11 +47,15 @@ textarea {
 	right: 6px;
 }
 
-::-webkit-scrollbar, ::-webkit-scrollbar-thumb,  ::-webkit-scrollbar-corner {
+::-webkit-scrollbar, ::-webkit-scrollbar-thumb {
   width: 16px;
   height: 16px;
 
   border-radius: 16px;
+}
+
+::-webkit-scrollbar-corner {
+	color: #0000;
 }
 
 .light_theme {
@@ -66,10 +70,6 @@ textarea {
 
 .light_theme ::-webkit-scrollbar {
   background-color: #ddd;
-}
-
-.light_theme ::-webkit-scrollbar-corner {
-	background-color: #eee;
 }
 
 .light_theme ::-webkit-scrollbar-thumb  {
@@ -92,8 +92,4 @@ textarea {
 
 .dark_theme ::-webkit-scrollbar-thumb  {
 	background-color: #555;
-}
-
-.dark_theme ::-webkit-scrollbar-corner {
-	background-color: #222;
 }
