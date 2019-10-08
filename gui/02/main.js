@@ -3,14 +3,11 @@ Terminal.add_theme('gruvbox_light', 'fbf1c7', '3c3836');
 
 const container = document.getElementById('container');
 const terminal = new Terminal(container);
-terminal.set_theme('gruvbox_light');
+terminal.theme = 'gruvbox_light';
 
-function handle_line(line) {
-  terminal.write_line(terminal._line_prompt + line);
-
-  let promise = terminal.prompt_line();
-  promise.then(handle_line);
+function line_handler(line) {
+  terminal.write(terminal.prompt + line);
+  terminal.read().then(line_handler);
 }
 
-let promise = terminal.prompt_line();
-promise.then(handle_line);
+terminal.read().then(line_handler);

@@ -1,249 +1,264 @@
 const Terminal = (() => {
 	const style = document.createElement('style');
 	style.setAttribute('type', 'text/css');
-	style.innerText = '.t_container { width: 100%; height: 100%; margin: 0; }'
-			+ ' .t_input { position: absolute; top: 0; left: 0; width: 0; height: 0;'
-			+ ' margin: 0; border: 0; padding: 0; }'
-			+ ' .t_output { font-family: "Lucida Console", monospace; font-size: 16px;'
-			+ ' width: calc(100% - 14px); height: calc(100% - 14px);'
-			+ ' margin: 4px; border: 1px; padding: 2px; border-radius: 4px;'
-			+ ' outline: none; resize: none; white-space: break-spaces; word-break: break-all; }'
+	style.innerText =
+		'.t_container { width: 100%; height: 100%; margin: 0; }'
+	+ ' .t_input { position: absolute; top: 0; left: 0; width: 0; height: 0;'
+	+ ' margin: 0; border: 0; padding: 0; }'
+	+ ' .t_output { font-family: "Lucida Console", monospace; font-size: 16px;'
+	+ ' width: calc(100% - 14px); height: calc(100% - 14px);'
+	+ ' margin: 4px; border: 1px; padding: 2px; border-radius: 4px;'
+	+ ' outline: none; resize: none; white-space: break-spaces; word-break: break-all; }'
+	+ ' .t_theme_default { background-color: #000; color: #FFF; border: 1px #FFF solid; }';
+
 	document.head.appendChild(style);
-
-	function assert_type(value, expected, name, regex) {
-		if (typeof expected == 'string') {
-			if (typeof value == expected && (!regex || regex.test(value)))
-				return;
-		} else
-			if (value instanceof expected)
-				return;
-
-		throw new Error('Bad ' + name + ' argument: ' + value);
-	}
-
-	const theme_name_regex = /^[0-9a-z_]+$/;
-	const theme_color_regex = /^[0-9a-f]{6}$/;
-
-	const default_line_prompt = '> ';
-	const default_cursor_rate = 450;
 
 	return class Terminal {
 
 		static add_theme(name, background, foreground) {
-			assert_type(name, 'string', 'name', theme_name_regex);
-			assert_type(background, 'string', 'background', theme_color_regex);
-			assert_type(foreground, 'string', 'foreground', theme_color_regex);
-
-			style.innerText += ' .t_theme_' + name + ' .t_output {'
-				+ ' background-color: #' + background + ';'
-				+ ' color: #' + foreground + ';'
-				+ ' border: 1px #' + foreground + ' solid; }';
+			style.innerText +=
+						` .t_theme_${name} .t_output { background-color: #${background};`
+					+ `color: #${foreground}; border: 1px #${foreground} solid; }`;
 		}
 
-		constructor(container, has_history) {
-			assert_type(container, Element, 'container');
-			if (has_history)
-				assert_type(has_history, 'boolean', 'has history');
+		_handle_key(event) {
+			if (!this._prompting)
+				return event.preventDefault();
 
-			container.setAttribute('class', 't_container');
-			container.innerText = '';
+			const input = this._input,
+				use_history = this._use_history,
+				history_index = this._history_index,
+				history = this._history;
 
-			const input = document.createElement('input');
+			switch (event.key) {
+				case 'ArrowLeft':
+					if (input.selectionStart > 0)
+						input.selectionStart--;
+					break;
+				case 'ArrowRight':
+					if (input.selectionStart < input.value.length)
+						input.selectionStart++;
+					break;
+				case 'ArrowUp':
+					if (!use_history)
+						break;
+
+					if (history_index > 0) {
+						history_index--;
+						input.value = history[history_index];
+						input.selectionStart = input.value.length;
+					}
+					break;
+				case 'ArrowDown':
+					if (!use_history)
+						break;
+
+					if (history_index < history.length - 1) {
+						history_index--;
+						input.value = history[history_index];
+						input.selectionStart = input.value.length;
+					}
+					break;
+				case 'Enter':
+					if (use_history)
+						history.push(input.value);
+
+					this._prompting = false;
+					this._resolve(input.value);
+					break;
+				case 'V':
+					if (event.ctrlKey)
+						return;
+				default:
+					if (event.ctrlKey)
+						event.preventDefault();
+					return;
+			}
+
+			input.selectionEnd = input.selectionStart;
+			this._update_cursor();
+
+			event.preventDefault();
+		}
+
+		_update_output() {
+			const output = this._output,
+				input = this._input,
+				blinked = this._blinked;
+
+			output.value = this._text;
+			if (this._prompting) {
+				output.value += this._prompt;
+
+				if (input.selectionStart == input.value.length)
+					output.value += input.value + (blinked ? '\u2588' : '\xA0\u200B');
+				else
+					output.value += blinked
+						? input.value.substring(0, input.selectionStart) + '\u2588'
+						+ input.value.substring(input.selectionStart + 1) : input.value;
+			}
+
+			output.scrollTop = output.scrollHeight;
+		}
+
+		_blink() {
+			this._blinked = !this._blinked;
+			this._update_output();
+		}
+
+		_update_cursor() {
+			if (!this._prompting)
+				return;
+
+			clearInterval(this._interval);
+			this._interval = 0;
+
+			if (!this._focused) {
+				this._blinked = false;
+				this._update_output();
+				return;
+			}
+
+			this._blinked = true;
+			this._interval = setInterval(this._blink.bind(this), this._delay);
+			this._update_output();
+		}
+
+		_set_focused(new_focused) {
+			this._focused = new_focused;
+			this._update_cursor();
+		}
+
+		get container() {
+			return this._container;
+		}
+
+		set container(new_container) {
+			const old_container = this._container,
+				theme = 't_theme_' + this._theme;
+
+			if (old_container) {
+				old_container.classList.remove('t_container', theme);
+				old_container.innerText = '';
+			}
+
+			if (new_container) {
+				new_container.classList.add('t_container', theme);
+				new_container.innerText = '';
+				new_container.appendChild(this._output);
+				new_container.appendChild(this._input);
+			}
+
+			this._container = new_container;
+		}
+
+		get theme() {
+			return this._theme;
+		}
+
+		set theme(new_theme) {
+			const container = this._container,
+				old_theme = `t_theme_${this._theme}`;
+
+			if (container) {
+				container.classList.remove(old_theme);
+				container.classList.add(`t_theme_${new_theme}`);
+			}
+
+			this._theme = new_theme;
+		}
+
+		get delay() {
+			return this._delay;
+		}
+
+		set delay(new_delay) {
+			this._delay = new_delay;
+			this._update_cursor();
+		}
+
+		get prompt() {
+			return this._prompt;
+		}
+
+		set prompt(new_prompt) {
+			this._prompt = new_prompt;
+			this._update_output();
+		}
+
+		get prompting() {
+			return this._prompting;
+		}
+
+		get use_history() {
+			return this._use_history;
+		}
+
+		set use_history(new_use_history) {
+			if (this._use_history != new_use_history)
+				this._history = new_use_history ? [] : null;
+			this._use_history = new_use_history;
+		}
+
+		read() {
+			if (this._prompting)
+				throw new Error("Already prompting");
+
+			this._history_index = this._use_history ? this._history.length : 0;
+			this._prompting = true;
+			this._input.value = '';
+			this._update_cursor();
+
+			return new Promise(resolve => this._resolve = resolve);
+		}
+
+		write(text) {
+			this._text += text + '\r\n';
+			this._update_output();
+		}
+
+		constructor(constructor, use_history) {
+			const output = document.createElement('textarea'),
+						input = document.createElement('input');
+
+			output.setAttribute('readonly', 'readonly');
+			output.classList.add('t_output');
+			this._output = output;
+
 			input.setAttribute('type', 'text');
-			input.setAttribute('class', 't_input');
 			input.setAttribute('autocomplete', 'off');
 			input.setAttribute('autocorect', 'off');
 			input.setAttribute('autocapitalize', 'off');
 			input.setAttribute('spellcheck', 'false');
-			container.appendChild(input);
-
-			const output = document.createElement('textarea');
-			output.setAttribute('readonly', 'readonly');
-			output.setAttribute('class', 't_output');
-			container.appendChild(output);
-
-			this._container = container;
-			this._output = output;
+			input.classList.add('t_input');
 			this._input = input;
 
-			this._line_prompt = default_line_prompt;
-			this._cursor_rate = default_cursor_rate;
+			this._theme = "default";
+			this.container = container;
+			this.use_history = use_history;
 
-			this._line_prompting = false;
-			this._line_resolver = null;
+			this._prompting = false;
+			this._prompt = '> ';
+			this._delay = 450;
 
-			this._cursor_focused = false;
-			this._cursor_blinked = false;
-			this._cursor_interval = 0;
+			this._focused = false;
+			this._blinked = false;
+			this._interval = 0;
+			this._resolve = null;
 
-			this._history_position = 0;
-			this._history = has_history ? [] : null;
-
-			this._output_text = '';
+			this._text = '';
 
 			let clicked = false;
-
 			output.addEventListener('mousedown', event => { clicked = true; });
-			output.addEventListener('mousemove', event => { if (output.selectionEnd
-				- output.selectionStart > 0) clicked = false; });
-			output.addEventListener('mouseup', event => { if (output.selectionEnd
-				- output.selectionStart > 0) clicked = false; });
-			output.addEventListener('mouseup', event => { if (output.selectionEnd
-				- output.selectionStart == 0 && clicked) input.focus(); });
+			output.addEventListener('mousemove', event => (output.selectionEnd
+				- output.selectionStart > 0) ? clicked = false : 0);
+			output.addEventListener('mouseup', event => (output.selectionEnd
+				- output.selectionStart == 0 && clicked) ? input.focus() : 0);
 
-			input.addEventListener('focus', event => this._set_cursor_focus(true));
-			input.addEventListener('blur', event => this._set_cursor_focus(false));
-			input.addEventListener('input', event => this._update_cursor_focus(true));
-
-			input.addEventListener('keydown', event => {
-				if (!this._line_prompting) {
-					event.preventDefault();
-					return;
-				}
-
-			  switch (event.key) {
-			    case 'ArrowLeft':
-			      if (input.selectionStart > 0)
-			        input.selectionStart--;
-			      break;
-			    case 'ArrowRight':
-			      if (input.selectionStart < input.value.length)
-			        input.selectionStart++;
-			      break;
-			    case 'ArrowUp':
-						if (!this._history)
-							break;
-
-			      if (this._history_position > 0) {
-			        this._history_position--;
-							input.value = this._history[this._history_position];
-							input.selectionStart = input.value.length;
-			      }
-			      break;
-			    case 'ArrowDown':
-						if (!this._history)
-							break;
-
-			      if (this._history_position < this._history.length - 1) {
-			        this._history_position++;
-							input.value = this._history[this._history_position];
-							input.selectionStart = input.value.length;
-			      }
-			      break;
-			    case 'Enter':
-						if (this._history)
-							this._history.push(input.value);
-
-						this._set_line_prompting(false);
-						this._line_resolver(input.value);
-			      break;
-			    default:
-			      if (event.ctrlKey)
-			        event.preventDefault();
-			      return;
-			  }
-
-			  input.selectionEnd = input.selectionStart;
-			  this._update_cursor_focus();
-
-			  event.preventDefault();
-			});
-		}
-
-		_update_output() {
-		  this._output.value = this._output_text;
-			if (this._line_prompting) {
-				this._output.value += this._line_prompt;
-
-				if (this._input.selectionStart == this._input.value.length)
-					this._output.value += this._input.value + (this._cursor_blinked ? '\u2588' : '\xA0\u200B');
-				else
-					this._output.value += this._cursor_blinked
-						? this._input.value.substring(0, this._input.selectionStart)
-						+ '\u2588'
-						+ this._input.value.substring(this._input.selectionStart + 1)
-						: this._input.value;
-			}
-
-		  this._output.scrollTop = this._output.scrollHeight;
-		}
-
-		_set_cursor_focus(new_cursor_focus) {
-			this._cursor_focused = new_cursor_focus;
-
-			if (!this._line_prompting)
-				return;
-
-			clearInterval(this._cursor_interval);
-			this._cursor_interval = 0;
-
-			if (!this._cursor_focused) {
-				this._cursor_blinked = false;
-				this._update_output();
-
-				return;
-			}
-
-			this._cursor_blinked = true;
-
-			if (this._line_prompting) {
-				this._update_output();
-				this._cursor_interval = setInterval(() => { terminal._cursor_blinked
-					= !terminal._cursor_blinked; terminal._update_output(); },
-					this._cursor_rate);
-			}
-		}
-
-		_update_cursor_focus() {
-			this._set_cursor_focus(this._cursor_focused);
-		}
-
-		_set_line_prompting(new_line_prompting) {
-				this._line_prompting = new_line_prompting;
-				this._update_cursor_focus();
-				this._update_output();
-		}
-
-		set_theme(name) {
-			assert_type(name, 'string', 'name', theme_name_regex);
-
-			this._container.setAttribute('class', 't_container t_theme_' + name);
-		}
-
-		set_line_prompt(new_line_prompt) {
-			assert_type(new_line_prompt, 'string', 'new line prompt');
-
-			this._line_prompt = new_line_prompt;
-			this._update_output();
-		}
-
-		set_cursor_rate(new_cursor_rate) {
-			assert_type(new_cursor_rate, 'number', 'new cursor rate');
-
-			this._cursor_rate = new_cursor_rate;
-			this._update_cursor_focus();
-			this._update_output();
-		}
-
-		is_line_prompting() {
-			return this._line_prompting;
-		}
-
-		prompt_line() {
-			if (this._line_prompting)
-				throw new Error("Line is already prompting");
-
-			this._history_position = this._history ? this._history.length : 0;
-			this._input.value = '';
-
-			this._set_line_prompting(true);
-			return new Promise(resolver => this._line_resolver = resolver);
-		}
-
-		write_line(message) {
-			assert_type(message, 'string', 'message');
-			this._output_text += message + '\r\n';
-			this._update_output();
+			input.addEventListener('focus', event => this._set_focused(true));
+			input.addEventListener('blur', event => this._set_focused(false));
+			input.addEventListener('input', event => this._set_focused(true));
+			input.addEventListener('keydown', this._handle_key.bind(this));
 		}
 	}
 })();
