@@ -7,4 +7,4 @@
 * [One Pagers](https://galaxtone.github.io/onepage)
 
 ### Files
-* [Complete Mini UNO Image](https://galaxtone.github.io/complete.png]
+* [Complete Mini UNO Image](https://galaxtone.github.io/complete.png)
