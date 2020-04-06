@@ -5,7 +5,7 @@
 * [GUI Mockups](https://galaxtone.github.io/gui/)
 
 ### Files
-* [Complete Mini UNO Image](https://galaxtone.github.io/complete.png)
+* [Complete Mini UNO 25x35 Image](https://galaxtone.github.io/complete_uno.png)
 
 ### Projects
 * [One Pagers](https://galaxtone.github.io/onepage)
