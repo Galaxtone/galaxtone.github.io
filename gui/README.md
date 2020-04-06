@@ -1,4 +1,4 @@
-# /gui>
+# /Gui Mockups>
 [Go Back](https://galaxtone.github.io/)
 
 ### Directories
