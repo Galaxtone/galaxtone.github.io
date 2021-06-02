@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html>
+  <!-- MIT License -->
+  <!--
+  Copyright © 2021 Galaxtone
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy of
+  this software and associated documentation files (the “Software”), to deal
+  in the Software without restriction, including without limitation the rights to
+  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+  the Software, and to permit persons to whom the Software is furnished to do so,
+  subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in all
+  copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+  -->
+  <!-- Hello! -->
+  <!-- I'm having way too much fun making every single element absolutely positioned, it's like I turned off HTML's natural layout and just enabled pixel-percise positioning-->
+  <head>
+    <title>HTML5 Operating System</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+body {
+  overflow: hidden;
+  margin: 0;
+  background-color: #fff;
+  font-family: Arial, sans-serif;
+}
+
+.hidden {
+  opacity: 0;
+}
+
+.taskbar {
+  width: 100%;
+  height: 40px;
+  background-color: #333;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.start_button {
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.start_button .circle {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background-color: #fff;
+  position: absolute;
+  left: 6px;
+  top: 6px;
+}
+
+.start_button .circle2 {
+  width: 14px;
+  height: 14px;
+  border: 2px solid #333;
+  border-radius: 50%;
+  background-color: #fff;
+  position: absolute;
+  left: 5px;
+  top: 5px;
+}
+
+.start_button:hover .circle, .start_button:hover .circle2 {
+  background-color: #bbb;
+}
+
+.start_button.actived .circle, .start_button.actived .circle2 {
+  background-color: #999;
+}
+
+.start_button:active .circle, .start_button:active .circle2 {
+  background-color: #777;
+}
+
+.start_menu {
+  width: 480px;
+  height: 624px;
+  border-top-right-radius: 2px;
+  background-color: #333;
+  position: absolute;
+  left: 0;
+  bottom: 40px;
+}
+
+.start_menu.hidden {
+  position: absolute;
+  left: -1000px;
+}
+
+@keyframes start_menu {
+  from {
+    opacity: 0;
+    left: 0;
+    bottom: -60px;
+  }
+  to {
+    opacity: 1;
+    left: 0;
+    bottom: 40px;
+  }
+}
+
+.start_menu.activate {
+  animation: start_menu 0.15s;
+}
+
+.start_menu.deactivate {
+  animation: start_menu 0.25s reverse;
+}
+
+.start_menu .top {
+  width: 432px;
+  height: 60px;
+  position: absolute;
+  left: 24px;
+  top: 18px;
+}
+
+.start_menu .top .icon {
+  width: 54px;
+  height: 54px;
+  cursor: pointer;
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+.start_menu .top .icon .circle {
+  width: 50px;
+  height: 50px;
+  border: 2px solid #6ac;
+  border-radius: 50%;
+  background-color: #07b;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.start_menu .top .icon .circle2 {
+  width: 23px;
+  height: 23px;
+  border: 4px solid #fff;
+  border-radius: 50%;
+  background-color: #07b;
+  position: absolute;
+  left: 9.5px;
+  top: 9.5px;
+}
+
+.start_menu .top .text {
+  width: 360px;
+  height: 30px;
+  color: white;
+  position: absolute;
+  left: 72px;
+  top: 0;
+}
+
+.start_menu .top .text .short {
+  font-size: 18.67px;
+  position: absolute;
+  bottom: 0;
+}
+
+.start_menu .top .text .long {
+  font-size: 13.33px;
+  position: absolute;
+  bottom: 0;
+}
+
+.start_menu .top .search {
+  width: 360px;
+  height: 30px;
+  position: absolute;
+  left: 72px;
+  top: 30px;
+}
+
+.start_menu .top .search .input {
+  width: 350px;
+  height: 20px;
+  padding: 3px;
+  outline: 1px solid #378;
+  border: 1px solid #4ae;
+  border-radius: 2px;
+  background-color: #222;
+  color: white;
+  position: absolute;
+  top: 1px;
+  left: 1px;
+}
+
+.start_menu .seperator {
+  width: 432px;
+  height: 1px;
+  background-color: #444;
+  position: absolute;
+  left: 24px;
+  top: 94px;
+}
+
+@keyframes fade_in {
+  from {
+    opacity: 0;
+    left: 0;
+  }
+  to {
+    opacity: 1;
+    left: 0;
+  }
+}
+
+.start_menu .text .activate {
+  animation: fade_in 0.08s;
+}
+
+.start_menu .text .deactivate {
+  animation: fade_in 0.08s reverse;
+}
+
+.start_menu .wip {
+  color: white;
+  position: absolute;
+  top: 96px;
+  left: 24px;
+}
+    </style>
+  </head>
+  <body>
+    <!-- TODO Get rid of all the nested css selectors, use some shorthand for classes, somehow leaving verbose information out of code and css -->
+    <!-- TODO Rework everything, simply, make more efficient, and ignore HTML and CSS general pratices -->
+    <!-- TODO As per #1, figure out some namespace shorthand, to simplify css specifiers that are doing nested class checks, and simplify long ids used in code -->
+    <!-- TODO Also, improve the javascript required notice and have everything hidden by default, and hide notice (as it would no longer be a noscript tag, those are deprecated) and unhide everything on script load-->
+    <!-- TODO Consider making backwards compatible with IE and older browsers -->
+    <noscript>Javascript required</noscript>
+    <!-- TODO Figure out .hidden class issue -->
+    <!-- TODO Regardless of state in DOM experiments, there is an issue with using DOM for rendering like this, as visibility state has be encoded, which is a bit dirty, like for e.g. the start menu can be made visible by default by modifiying non-code -->
+    <!-- INFO Maybe to fix the last two TODO's, handle visibility in javascript, adding and removing the elements entirely when animation is finished -->
+    <div class="start_menu hidden" id="start_menu">
+      <div class="top">
+        <div class="icon" id="start_menu_icon">
+          <div class="circle">
+            <div class="circle2">
+            </div>
+          </div>
+        </div>
+        <!-- Shorthand experiment -->
+        <div class="text" id="start_menu_text">
+          <!-- id smts = Smart Menu Text Small -->
+          <div class="short" id="smts">Username</div>
+          <!-- id smtl = Smart Menu Text Long -->
+          <div class="long hidden" id="smtl">user@ComputerName (Ubuntu xx.yy.zz LTS)</div>
+        </div>
+        <div class="search">
+          <input class="input" id="start_menu_search_input" type="text" placeholder="Search..."></input>
+        </div>
+      </div>
+      <div class="seperator"></div>
+      <div class="wip">This is a work-in-progress, based off KUbuntu GUI.</div>
+    </div>
+    <div class="taskbar">
+      <div class="start_button" id="start_button">
+        <div class="circle">
+          <div class="circle2">
+          </div>
+        </div>
+      </div>
+    </div>
+    <script>
+// TODO Simplify code below into factory function
+var start_button = document.getElementById("start_button");
+var start_menu = document.getElementById("start_menu");
+var start_menu_search_input = document.getElementById("start_menu_search_input");
+var start_button_classes = start_button.classList;
+var start_menu_classes = start_menu.classList;
+
+function start_menu_activate() {
+  start_button_classes.add("activated");
+  start_menu_classes.remove("hidden");
+  start_menu_classes.remove("deactivate");
+  start_menu.offsetWidth;
+  start_menu_classes.add("activate");
+  start_menu_search_input.focus();
+}
+
+function start_menu_deactivate() {
+    start_button_classes.remove("activated");
+    start_menu_classes.add("hidden");
+    start_menu_classes.remove("activate");
+    start_menu.offsetWidth;
+    start_menu_classes.add("deactivate");
+    start_menu_search_input.blur();
+}
+
+// Close start menu if you click off of it
+document.addEventListener("click", function(event) {
+  // contains() apparently checks if the element is itself, even if it's not contained, so thats good!
+  // I need to exempt start_menu and start_button or any of it's children used for visual appearance so
+  // that the menu isn't closed when you click inside the menu (and thus itself or any of it's children) or
+  // immeditially after trying to open it when you click on the start menu button
+  // so that it only closes when you click off of the menu while it's open
+  if (!start_button.contains(event.target) && !start_menu.contains(event.target) && start_button_classes.contains("activated")) {
+    start_menu_deactivate();
+  }
+});
+
+// Experimenting with state in DOM, probably not a good idea.
+start_button.addEventListener("click", function() {
+  if (!start_button_classes.contains("activated")) {
+    start_menu_activate();
+  } else {
+    start_menu_deactivate();
+  }
+});
+
+// Prevent input from defocusing while start menu is focused
+start_menu.addEventListener("click", function(event) {
+  if (start_button_classes.contains("activated")) {
+    start_menu_search_input.focus();
+  }
+});
+
+// Shorthand experiment
+function g(id) { return document.getElementById(id); }
+var smt = g("start_menu_text"); // Start Menu Text
+var smts = g("smts"); // Start Menu Text Short
+var smtl = g("smtl"); // Start Menu Text Long
+var smtsc = smts.classList; // Start Menu Text Short Classes
+var smtlc = smtl.classList; // Start Menu Text Long Classes
+smt.addEventListener("mouseover", function() {
+  smtsc.add("hidden");
+  smtlc.remove("hidden");
+
+  smtsc.remove("activate");
+  smtlc.remove("deactivate");
+  smt.offsetWidth;
+  smtsc.add("deactivate");
+  smtlc.add("activate");
+});
+smt.addEventListener("mouseout", function() {
+  smtsc.remove("hidden");
+  smtlc.add("hidden");
+
+  smtlc.remove("activate");
+  smtsc.remove("deactivate");
+  smt.offsetWidth;
+  smtlc.add("deactivate");
+  smtsc.add("activate");
+});
+
+var start_menu_icon = document.getElementById("start_menu_icon");
+start_menu_icon.addEventListener("click", function() {
+  alert("TODO");
+});
+    </script>
+  </body>
+</html>
