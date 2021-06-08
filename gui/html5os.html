@@ -1,28 +1,8 @@
 <!DOCTYPE html>
 <html>
-  <!-- MIT License -->
-  <!--
-  Copyright © 2021 Galaxtone
-
-  Permission is hereby granted, free of charge, to any person obtaining a copy of
-  this software and associated documentation files (the “Software”), to deal
-  in the Software without restriction, including without limitation the rights to
-  use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
-  the Software, and to permit persons to whom the Software is furnished to do so,
-  subject to the following conditions:
-
-  The above copyright notice and this permission notice shall be included in all
-  copies or substantial portions of the Software.
-
-  THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
-  FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
-  COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
-  IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
-  CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
-  -->
   <!-- Hello! -->
   <!-- I'm having way too much fun making every single element absolutely positioned, it's like I turned off HTML's natural layout and just enabled pixel-percise positioning-->
+  <!-- MERGED window.html into for a more complete experimental experience -->
   <head>
     <title>HTML5 Operating System</title>
     <meta charset="UTF-8">
@@ -243,6 +223,134 @@ body {
   left: 24px;
 }
     </style>
+    <style>
+body {
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+}
+
+.win {
+  /* Go behind start menu */
+  z-index: -10;
+  border: 1px solid #000;
+  border-radius: 8px;
+  background-color: #ccc;
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+
+.win_icon {
+  width: 12px;
+  height: 12px;
+  background-color: #777;
+  border: 2px solid #555;
+  border-radius: 3px;
+  position: absolute;
+  left: 8px;
+  top: 4px;
+}
+
+.win_title {
+  width: calc(100% - 35px);
+  height: 26px;
+  overflow: hidden;
+  position: absolute;
+  left: 28px;
+  top: 3px;
+}
+
+.win_n {
+  width: calc(100% - 18px);
+  height: 10px;
+  position: absolute;
+  left: 9px;
+  top: -6px;
+  cursor: ns-resize;
+}
+
+.win_ne {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  left: calc(100% - 9px);
+  top: -6px;
+  cursor: nesw-resize;
+}
+
+.win_e {
+  width: 10px;
+  height: calc(100% - 18px);
+  position: absolute;
+  left: calc(100% - 4px);
+  top: 9px;
+  cursor: ew-resize;
+}
+
+.win_se {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  left: calc(100% - 9px);
+  top: calc(100% - 9px);
+  cursor: nwse-resize;
+}
+
+.win_s {
+  width: calc(100% - 18px);
+  height: 10px;
+  position: absolute;
+  left: 9px;
+  top: calc(100% - 4px);
+  cursor: ns-resize;
+}
+
+.win_sw {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  left: -6px;
+  top: calc(100% - 9px);
+  cursor: nesw-resize;
+}
+
+.win_w {
+  width: 10px;
+  height: calc(100% - 18px);
+  position: absolute;
+  left: -6px;
+  top: 9px;
+  cursor: ew-resize;
+}
+
+.win_nw {
+  width: 15px;
+  height: 15px;
+  position: absolute;
+  left: -6px;
+  top: -6px;
+  cursor: nwse-resize;
+}
+
+.win_titlebar {
+  width: calc(100% + 2px);
+  height: 23px;
+  position: absolute;
+  left: -1px;
+  top: -1px;
+  cursor: default;
+}
+
+.win_body {
+  width: calc(100% - 14px);
+  height: calc(100% - 30px);
+  margin: 6px;
+  border: 1px solid #000;
+  position: absolute;
+  left: 0;
+  top: 16px;
+}
+    </style>
   </head>
   <body>
     <!-- TODO Get rid of all the nested css selectors, use some shorthand for classes, somehow leaving verbose information out of code and css -->
@@ -284,6 +392,21 @@ body {
         </div>
       </div>
     </div>
+    <div class="win hidden">
+      <div class="win_titlebar">
+        <div class="win_icon"></div>
+        <div class="win_title">My First Window</div>
+      </div>
+      <div class="win_n"></div>
+      <div class="win_ne"></div>
+      <div class="win_e"></div>
+      <div class="win_se"></div>
+      <div class="win_s"></div>
+      <div class="win_sw"></div>
+      <div class="win_w"></div>
+      <div class="win_nw"></div>
+      <div class="win_body" style="background-color: #fdd;"></div>
+    </div>
     <script>
 // TODO Simplify code below into factory function
 var start_button = document.getElementById("start_button");
@@ -311,7 +434,8 @@ function start_menu_deactivate() {
 }
 
 // Close start menu if you click off of it
-document.addEventListener("click", function(event) {
+// Should be mousedown, not click.
+document.addEventListener("mousedown", function(event) {
   // contains() apparently checks if the element is itself, even if it's not contained, so thats good!
   // I need to exempt start_menu and start_button or any of it's children used for visual appearance so
   // that the menu isn't closed when you click inside the menu (and thus itself or any of it's children) or
@@ -370,6 +494,141 @@ var start_menu_icon = document.getElementById("start_menu_icon");
 start_menu_icon.addEventListener("click", function() {
   alert("TODO");
 });
+    </script>
+    <script>
+function clamp(x, min, max) {
+  if (max < min) { return min; }
+  return Math.max(Math.min(x, max), min);
+}
+function get(id) {
+  return document.getElementsByClassName(id)[0];
+}
+
+var page_width, page_height;
+page_width = window.innerWidth;
+// Account for start menu
+page_height = window.innerHeight - 40;
+
+var win_x = 0, win_y = 0;
+var win_inner_width = 0, win_inner_height = 0;
+var win_width = 0, win_height = 0;
+var win_element = get("win");
+var win_style = win_element.style;
+var win_classes = win_element.classList;
+function win_set_pos(x, y) {
+  win_x = x;
+  win_y = y;
+  win_style.left = clamp(x, 0, page_width - win_width) + "px";
+  win_style.top = clamp(y, 0, page_height - win_height) + "px";
+}
+function win_set_pos_clamped(x, y) {
+  win_x = clamp(x, 0, page_width - win_width);
+  win_y = clamp(y, 0, page_height - win_height);
+  win_style.left = win_x + "px";
+  win_style.top = win_y + "px";
+}
+function win_set_inner_size(inner_width, inner_height) {
+  win_inner_width = inner_width;
+  win_inner_height = inner_height;
+  win_width = win_inner_width + 16;
+  win_height = win_inner_height + 32;
+  win_style.width = (clamp(win_width, 0, page_width - win_x) - 2) + "px";
+  win_style.height = (clamp(win_height, 0, page_height - win_y) - 2) + "px";
+}
+function win_set_size(width, height) {
+  win_width = width;
+  win_height = height;
+  win_inner_width = win_width - 16;
+  win_inner_height = win_height - 32;
+  win_style.width = (clamp(win_width, 0, page_width - win_x) - 2) + "px";
+  win_style.height = (clamp(win_height, 0, page_height - win_y) - 2) + "px";
+}
+function win_set_size_clamped(width, height) {
+  win_width = clamp(width, 16, page_width - win_x);
+  win_height = clamp(height, 32, page_height - win_y);
+  win_inner_width = win_width - 16;
+  win_inner_height = win_height - 32;
+  win_style.width = (win_width - 2) + "px";
+  win_style.height = (win_height - 2) + "px";
+}
+function win_set_hidden(hide) {
+  if (hide) {
+    win_classes.add("hidden");
+  } else {
+    win_classes.remove("hidden");
+  }
+}
+
+window.addEventListener("resize", function() {
+  page_width = window.innerWidth;
+  // Account for start menu
+  page_height = window.innerHeight - 40;
+  win_style.left = clamp(win_x, 0, page_width - win_width) + "px";
+  win_style.top = clamp(win_y, 0, page_height - win_height) + "px";
+  win_style.width = (clamp(win_width, 0, page_width) - 2) + "px";
+  win_style.height = (clamp(win_height, 0, page_height) - 2) + "px";
+});
+
+var old_win_x, old_win_y;
+var old_win_width, old_win_height;
+var drag_x, drag_y, drag_func;
+function add_drag(element, func) {
+  element.addEventListener("mousedown", function(event) {
+    event.preventDefault();
+    drag_x = event.clientX;
+    drag_y = event.clientY;
+    old_win_x = win_x;
+    old_win_y = win_y;
+    old_win_width = win_width;
+    old_win_height = win_height;
+    drag_func = func;
+  });
+}
+document.addEventListener("mousemove", function(event) {
+  if (drag_func) {
+    drag_func(event.clientX - drag_x, event.clientY - drag_y);
+  }
+});
+document.addEventListener("mouseup", function() {
+  drag_func = null;
+});
+
+add_drag(get("win_titlebar"), function(x, y) {
+  win_set_pos_clamped(old_win_x + x, old_win_y + y);
+});
+add_drag(get("win_n"), function(x, y) {
+  win_set_pos_clamped(win_x, old_win_y + y);
+  win_set_size_clamped(win_width, old_win_height - y);
+});
+add_drag(get("win_ne"), function(x, y) {
+  win_set_pos_clamped(win_x, old_win_y + y);
+  win_set_size_clamped(old_win_width + x, old_win_height - y);
+});
+add_drag(get("win_e"), function(x, y) {
+  win_set_size_clamped(old_win_width + x, win_height);
+});
+add_drag(get("win_se"), function(x, y) {
+  win_set_size_clamped(old_win_width + x, old_win_height + y);
+});
+add_drag(get("win_s"), function(x, y) {
+  win_set_size_clamped(win_width, old_win_height + y);
+});
+add_drag(get("win_sw"), function(x, y) {
+  win_set_pos_clamped(old_win_x + x, win_y);
+  win_set_size_clamped(old_win_width - x, old_win_height + y);
+});
+add_drag(get("win_w"), function(x, y) {
+  win_set_pos_clamped(old_win_x + x, win_y);
+  win_set_size_clamped(old_win_width - x, win_height);
+});
+add_drag(get("win_nw"), function(x, y) {
+  win_set_pos_clamped(old_win_x + x, old_win_y + y);
+  win_set_size_clamped(old_win_width - x, old_win_height - y);
+});
+
+win_set_pos(100, 100);
+win_set_inner_size(400, 300);
+win_set_hidden(false);
     </script>
   </body>
 </html>
